@@ -2,15 +2,24 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const cors = require('cors');
+
 const app = express();
-const PORT =process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// Enable CORS for cross-origin requests (needed when deployed with a domain)
+app.use(cors());
 
 // Tell the server to understand JSON data (the language computers use to send tasks)
 app.use(express.json());
 
-// Tell the server where to look for your front-end file
+// Serve static files from the public folder
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve the main HTML file for the root route
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public-index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // 📁 THE DATABASE PATH (Our file-based pantry)
@@ -99,7 +108,20 @@ app.delete('/api/tasks/:id', (req, res) => {
     res.json(deletedTask[0]);
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+});
+
+// Handle 404 errors
+app.use((req, res) => {
+    res.status(404).json({ error: 'Not Found' });
+});
+
 // Start the server
-app.listen(PORT, () => {
-    console.log(`🚀 Server is running! Open http://localhost:${PORT} in your browser.`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server is running in ${NODE_ENV} mode`);
+    console.log(`📍 Port: ${PORT}`);
+    console.log(`🌐 Open http://localhost:${PORT} in your browser.`);
 });
