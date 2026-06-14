@@ -3,7 +3,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const app = express();
-const PORT = 3000;
+const PORT =process.env.PORT || 3000;
 
 // Tell the server to understand JSON data (the language computers use to send tasks)
 app.use(express.json());
